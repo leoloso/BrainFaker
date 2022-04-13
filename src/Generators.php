@@ -29,6 +29,7 @@ class Generators
         Provider\Comment::class => ['comment', 'comments'],
         Provider\Site::class => ['site', 'sites'],
         Provider\Error::class => ['error', 'errors'],
+        Provider\General::class => ['general', 'generals'],
     ];
 
     /**
