@@ -33,6 +33,14 @@ class General extends FunctionMockerProvider
             return;
         }
 
+        $this->functionExpectations->mock('get_option')
+            ->zeroOrMoreTimes()
+            ->andReturnUsing(
+                function ($option) { // phpcs:ignore
+                    return $option;
+                }
+            );
+
         $this->stopMockingFunctions();
     }
 }
