@@ -40,11 +40,7 @@ class General extends FunctionMockerProvider
 
         $this->functionExpectations->mock('get_option')
             ->zeroOrMoreTimes()
-            ->andReturnUsing(
-                function ($option) { // phpcs:ignore
-                    return $option;
-                }
-            );
+            ->andReturnUsing($this->getOption(...));
 
         $this->stopMockingFunctions();
     }
@@ -52,5 +48,13 @@ class General extends FunctionMockerProvider
     private function escSql(string|array $data): string|array
     {
         return $data;
+    }
+
+    private function getOption(string $option, mixed $default = false): mixed
+    {
+        if ($default !== false) {
+            return $default;
+        }
+        return $option;
     }
 }
