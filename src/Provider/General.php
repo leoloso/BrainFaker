@@ -33,6 +33,11 @@ class General extends FunctionMockerProvider
             return;
         }
 
+        $this->functionExpectations->mock('esc_sql')
+            ->zeroOrMoreTimes()
+            ->with(\Mockery::any())
+            ->andReturnUsing($this->escSql(...));
+
         $this->functionExpectations->mock('get_option')
             ->zeroOrMoreTimes()
             ->andReturnUsing(
@@ -42,5 +47,10 @@ class General extends FunctionMockerProvider
             );
 
         $this->stopMockingFunctions();
+    }
+
+    private function escSql(string|array $data): string|array
+    {
+        return $data;
     }
 }
