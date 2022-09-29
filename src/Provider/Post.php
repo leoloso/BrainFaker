@@ -246,38 +246,37 @@ class Post extends FunctionMockerProvider
             ->with(\Mockery::any())
             ->andReturnUsing($this->getPermalink(...));
 
-        $this->functionExpectations->mock('wp_update_post')
-            ->zeroOrMoreTimes()
-            ->andReturnUsing(
-                function ($postarr = array()) { // phpcs:ignore
-                    return $this->createOrUpdatePost($postarr);
-                }
-            );
-
         $this->functionExpectations->mock('wp_insert_post')
             ->zeroOrMoreTimes()
             ->andReturnUsing(
                 function ($postarr = array()) { // phpcs:ignore
-                    return $this->createOrUpdatePost($postarr);
+                    $post = $this->__invoke($postarr);
+                    return (int)$post->ID;
+                }
+            );
+
+        $this->functionExpectations->mock('wp_update_post')
+            ->zeroOrMoreTimes()
+            ->andReturnUsing(
+                function ($postarr = array()) { // phpcs:ignore
+                    $postId = $postarr['ID'];
+                    if (!$postId || !(is_numeric($postId) || is_string($postId)) || !($this->posts[$postId] ?? null)) {
+                        return $this->createWPError('invalid_post', 'Invalid post ID.' );
+                    }
+
+                    /**
+                     * Merge the new data with the existing data
+                     */
+                    $postarr = array_merge(
+                        $this->posts[$postId],
+                        $postarr
+                    );
+                    $post = $this->__invoke($postarr);
+                    return (int)$post->ID;
                 }
             );
 
         $this->stopMockingFunctions();
-    }
-
-    /**
-     * @param array<string,mixed> $postarr
-     * @return array<int,array<string,mixed>>
-     */
-    private function createOrUpdatePost(array $postarr = array()): \WP_Error|int
-    {
-        $postId = $postarr['ID'];
-        if (!$postId || !(is_numeric($postId) || is_string($postId))) {
-            return $this->createWPError('invalid_post', 'Invalid post ID.' );
-        }
-
-        $post = $this->__invoke($postarr);
-        return (int)$post->ID;
     }
 
     /**
