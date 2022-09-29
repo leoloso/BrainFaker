@@ -17,6 +17,7 @@ class Post extends FunctionMockerProvider
         filterDataEntries as upstreamFilterDataEntries;
         isMatchingProperty as upstreamIsMatchingProperty;
     }
+    use CreateWPErrorMockerProviderTrait;
 
     public const MIME_TYPES = [
         'image/jpeg',
@@ -245,7 +246,38 @@ class Post extends FunctionMockerProvider
             ->with(\Mockery::any())
             ->andReturnUsing($this->getPermalink(...));
 
+        $this->functionExpectations->mock('wp_update_post')
+            ->zeroOrMoreTimes()
+            ->andReturnUsing(
+                function ($postarr = array()) { // phpcs:ignore
+                    return $this->createOrUpdatePost($postarr);
+                }
+            );
+
+        $this->functionExpectations->mock('wp_insert_post')
+            ->zeroOrMoreTimes()
+            ->andReturnUsing(
+                function ($postarr = array()) { // phpcs:ignore
+                    return $this->createOrUpdatePost($postarr);
+                }
+            );
+
         $this->stopMockingFunctions();
+    }
+
+    /**
+     * @param array<string,mixed> $postarr
+     * @return array<int,array<string,mixed>>
+     */
+    private function createOrUpdatePost(array $postarr = array()): \WP_Error|int
+    {
+        $postId = $postarr['ID'];
+        if (!$postId || !(is_numeric($postId) || is_string($postId))) {
+            return $this->createWPError('invalid_post', 'Invalid post ID.' );
+        }
+
+        $post = $this->__invoke($postarr);
+        return (int)$post->ID;
     }
 
     /**
