@@ -444,7 +444,6 @@ class User extends FunctionMockerProvider
         }
 
         $this->functionExpectations->mock('get_userdata')
-            ->zeroOrMoreTimes()
             ->andReturnUsing(
                 function ($userId = null) { //phpcs:ignore
                     if (!is_numeric($userId) || !array_key_exists((int)$userId, $this->users)) {
@@ -456,7 +455,6 @@ class User extends FunctionMockerProvider
             );
 
         $this->functionExpectations->mock('get_user_by')
-            ->zeroOrMoreTimes()
             ->with(\Mockery::any(), \Mockery::any())
             ->andReturnUsing(
                 function ($field, $value) { //phpcs:ignore
@@ -485,7 +483,6 @@ class User extends FunctionMockerProvider
             );
 
         $this->functionExpectations->mock('user_can')
-            ->zeroOrMoreTimes()
             ->with(\Mockery::any(), \Mockery::any())
             ->andReturnUsing(
                 function ($user = null, $cap = null) { // phpcs:ignore
@@ -504,17 +501,14 @@ class User extends FunctionMockerProvider
             );
 
         $this->functionExpectations->mock('get_users')
-            ->zeroOrMoreTimes()
             ->with(\Mockery::any())
             ->andReturnUsing($this->getEntityEntries(...));
 
         $this->functionExpectations->mock('wp_signon')
-            ->zeroOrMoreTimes()
             ->with(\Mockery::any())
             ->andReturnUsing($this->wpSignOn(...));
 
         $this->functionExpectations->mock('wp_set_current_user')
-            ->zeroOrMoreTimes()
             ->with(\Mockery::any())
             ->andReturnUsing($this->wpSetCurrentUser(...));
 
