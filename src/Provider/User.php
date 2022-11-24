@@ -544,6 +544,10 @@ class User extends FunctionMockerProvider
             ->with(\Mockery::any())
             ->andReturnUsing($this->wpSignOn(...));
 
+        $this->functionExpectations->mock('wp_logout')
+            ->with(\Mockery::any())
+            ->andReturnUsing($this->wpLogout(...));
+
         $this->functionExpectations->mock('wp_set_current_user')
             ->with(\Mockery::any())
             ->andReturnUsing($this->wpSetCurrentUser(...));
@@ -605,6 +609,14 @@ class User extends FunctionMockerProvider
         return $users[0];
     }
 
+    private function wpLogout(): void
+    {
+        if (!$this->currentUserSet) {
+            throw new \Error('No user is currently logged-in.');
+        }
+        $this->makeCurrent(null);
+    }
+
     private function wpSetCurrentUser(int $userID): void
     {
         $users = $this->getEntityEntries(['include' => $userID]);
@@ -618,8 +630,17 @@ class User extends FunctionMockerProvider
      * @param \WP_User $user
      * @return void
      */
-    private function makeCurrent(\WP_User $user): void
+    private function makeCurrent(?\WP_User $user): void
     {
+        if ($user === null) {    
+            $this->currentUserSet = false;
+    
+            Monkey\Functions\when('is_user_logged_in')->justReturn(false);
+            Monkey\Functions\when('get_current_user_id')->justReturn(null);
+            Monkey\Functions\when('wp_get_current_user')->justReturn(null);
+            return;
+        }
+
         if ($this->currentUserSet) {
             throw new \Error('Only one user can be made the current one.');
         }
