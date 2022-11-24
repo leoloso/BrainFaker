@@ -619,6 +619,10 @@ class User extends FunctionMockerProvider
 
     private function wpSetCurrentUser(int $userID): void
     {
+        if ($userID === 0) {
+            $this->makeCurrent(null);
+            return;
+        }
         $users = $this->getEntityEntries(['include' => $userID]);
         if ($users !== []) {
             $user = $users[0];
