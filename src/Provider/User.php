@@ -496,7 +496,43 @@ class User extends FunctionMockerProvider
 
                     $caps = $this->users[(int)$userId]['allcaps'];
 
-                    return !empty($caps[$cap]);
+                    if (!empty($caps[$cap])) {
+                        return true;
+                    }
+                    
+                    /**
+                     * Capabilities to be applied on a specific entity:
+                     * Broadly create a logic to support them
+                     */
+                    $replacementCaps = [
+                        'edit_user' => 'edit_users',
+                        'delete_post' => 'delete_posts',
+                        'delete_page' => 'delete_pages',
+                        'edit_post' => 'edit_posts',
+                        'edit_page' => 'edit_pages',
+                        'read_post' => 'read_posts',
+                        'read_page' => 'read_pages',
+                        'publish_post' => 'publish_posts',
+                        'edit_post_meta' => null,
+                        'delete_post_meta' => null,
+                        'add_post_meta' => null,
+                        'edit_comment_meta' => null,
+                        'delete_comment_meta' => null,
+                        'add_comment_meta' => null,
+                        'edit_term_meta' => null,
+                        'delete_term_meta' => null,
+                        'add_term_meta' => null,
+                        'edit_user_meta' => null,
+                        'delete_user_meta' => null,
+                        'add_user_meta' => null,
+                        'edit_comment' => null,
+                    ];
+                    $replacementCap = $replacementCaps[$cap] ?? null;
+                    if ($replacementCap !== null) {
+                        return !empty($caps[$replacementCap]);
+                    }
+
+                    return false;
                 }
             );
 
