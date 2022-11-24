@@ -204,12 +204,12 @@ class Post extends FunctionMockerProvider
                 function ($post) { // phpcs:ignore
                     $postId = is_object($post) ? $post->ID : $post;
                     if (!$postId || !is_numeric($postId)) {
-                        return false;
+                        return null;
                     }
 
                     $data = $this->posts[(int)$postId] ?? null;
 
-                    return $data ? $this->__invoke($data) : false;
+                    return $data ? $this->__invoke($data) : null;
                 }
             );
 
