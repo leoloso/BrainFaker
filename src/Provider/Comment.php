@@ -136,6 +136,22 @@ class Comment extends FunctionMockerProvider
             return;
         }
 
+        $this->functionExpectations->mock('get_comment')
+            ->zeroOrMoreTimes()
+            ->with(\Mockery::any())
+            ->andReturnUsing(
+                function ($comment) { // phpcs:ignore
+                    $commentId = is_object($comment) ? $comment->ID : $comment;
+                    if (!$commentId || !is_numeric($commentId)) {
+                        return null;
+                    }
+
+                    $data = $this->comments[(int)$commentId] ?? null;
+
+                    return $data ? $this->__invoke($data) : null;
+                }
+            );
+
         $this->functionExpectations->mock('get_comments')
             ->zeroOrMoreTimes()
             ->with(\Mockery::any())
