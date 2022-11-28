@@ -597,14 +597,26 @@ class User extends FunctionMockerProvider
     {
         $username = $credentials['user_login'] ?? null;
         if ($username === null) {
-            return $this->createWPError('1', '\'user_login\' cannot be empty');
+            /**
+             * @see wordpress/wp-includes/user.php
+             */
+            return $this->createWPError(
+                'empty_username',
+                '<strong>Error:</strong> The username field is empty.'
+            );
         }
         $users = $this->getEntityEntries(['login' => $username]);
         if ($users === []) {
-            return $this->createWPError('2', sprintf(
-                'There is no user with username \'%s\'',
-                $username
-            ));
+            /**
+             * @see wordpress/wp-includes/user.php
+             */
+            return $this->createWPError(
+                'invalid_username',
+                sprintf(
+                    '<strong>Error:</strong> The username <strong>%s</strong> is not registered on this site. If you are unsure of your username, try your email address instead.',
+                    $username
+                )
+            );
         }
         return $users[0];
     }
