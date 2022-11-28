@@ -593,6 +593,11 @@ class User extends FunctionMockerProvider
         return $this->currentUserSet;
     }
 
+    /**
+     * Validate the password to always be "password"
+     *
+     * @param array<string,mixed> $credentials
+     */
     private function wpSignOn(array $credentials): \WP_User|\WP_Error
     {
         $username = $credentials['user_login'] ?? null;
@@ -613,6 +618,18 @@ class User extends FunctionMockerProvider
             return $this->createWPError(
                 'empty_password',
                 '<strong>Error:</strong> The password field is empty.'
+            );
+        }
+        if ($password !== "password") {
+            /**
+             * @see wordpress/wp-includes/user.php
+             */
+            return $this->createWPError(
+                'incorrect_password',
+                sprintf(
+                    '<strong>Error:</strong> The password you entered for the username %s is incorrect.',
+                    '<strong>' . $username . '</strong>'
+                )
             );
         }
         $users = $this->getEntityEntries(['login' => $username]);
