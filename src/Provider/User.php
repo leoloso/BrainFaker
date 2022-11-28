@@ -605,6 +605,16 @@ class User extends FunctionMockerProvider
                 '<strong>Error:</strong> The username field is empty.'
             );
         }
+        $password = $credentials['user_password'] ?? null;
+        if ($password === null) {
+            /**
+             * @see wordpress/wp-includes/user.php
+             */
+            return $this->createWPError(
+                'empty_password',
+                '<strong>Error:</strong> The password field is empty.'
+            );
+        }
         $users = $this->getEntityEntries(['login' => $username]);
         if ($users === []) {
             /**
