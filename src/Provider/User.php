@@ -585,6 +585,7 @@ class User extends FunctionMockerProvider
     {
         return [
             'login' => 'user_login',
+            'email' => 'user_email',
         ];
     }
 
@@ -600,8 +601,8 @@ class User extends FunctionMockerProvider
      */
     private function wpSignOn(array $credentials): \WP_User|\WP_Error
     {
-        $username = $credentials['user_login'] ?? null;
-        if ($username === null) {
+        $usernameOrEmail = $credentials['user_login'] ?? null;
+        if ($usernameOrEmail === null) {
             /**
              * @see wordpress/wp-includes/user.php
              */
@@ -628,12 +629,25 @@ class User extends FunctionMockerProvider
                 'incorrect_password',
                 sprintf(
                     '<strong>Error:</strong> The password you entered for the username %s is incorrect.',
-                    '<strong>' . $username . '</strong>'
+                    '<strong>' . $usernameOrEmail . '</strong>'
                 )
             );
         }
-        $users = $this->getEntityEntries(['login' => $username]);
+        $isEmailLogin = str_contains($usernameOrEmail, '@');
+        $key = $isEmailLogin ? 'email' : 'login';
+        $users = $this->getEntityEntries(
+            [$key => $usernameOrEmail]
+        );
         if ($users === []) {
+            if ($isEmailLogin) {
+                /**
+                 * @see wordpress/wp-includes/user.php
+                 */
+                return $this->createWPError(
+                    'invalid_email',
+                    'Unknown email address. Check again or try your username.'
+                );
+            }
             /**
              * @see wordpress/wp-includes/user.php
              */
@@ -641,7 +655,7 @@ class User extends FunctionMockerProvider
                 'invalid_username',
                 sprintf(
                     '<strong>Error:</strong> The username <strong>%s</strong> is not registered on this site. If you are unsure of your username, try your email address instead.',
-                    $username
+                    $usernameOrEmail
                 )
             );
         }
