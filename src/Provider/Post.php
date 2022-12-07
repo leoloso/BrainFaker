@@ -255,17 +255,6 @@ class Post extends FunctionMockerProvider
                 }
             );
 
-        $this->functionExpectations->mock('post_type_supports')
-            ->zeroOrMoreTimes()
-            ->andReturnUsing(
-                function (string $post_type, string $feature) { // phpcs:ignore
-                    if ($feature === 'comments') {
-                        return $post_type === 'post';
-                    }
-                    return true;
-                }
-            );
-
         $this->functionExpectations->mock('wp_update_post')
             ->zeroOrMoreTimes()
             ->andReturnUsing(
