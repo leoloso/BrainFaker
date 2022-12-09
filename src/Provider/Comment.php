@@ -162,9 +162,6 @@ class Comment extends FunctionMockerProvider
             ->with(\Mockery::any())
             ->andReturnUsing($this->insertComment(...));
 
-        $this->functionExpectations->mock('comments_open')
-            ->andReturn(true);
-
         $this->stopMockingFunctions();
     }
 

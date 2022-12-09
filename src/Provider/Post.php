@@ -276,6 +276,11 @@ class Post extends FunctionMockerProvider
                 }
             );
 
+        $this->functionExpectations->mock('comments_open')
+            ->zeroOrMoreTimes()
+            ->with(\Mockery::any())
+            ->andReturnUsing($this->areCommentsOpen(...));
+
         $this->stopMockingFunctions();
     }
 
@@ -380,6 +385,12 @@ class Post extends FunctionMockerProvider
         $slug = $post->post_name;
         $domain = 'https://www.mysite.com';
         return $domain . '/' . $slug;
+    }
+    
+    private function areCommentsOpen(int|\WP_Post $post): bool
+    {
+        $post = is_object($post) ? $post : $this->getPost($post);
+        return $post->comment_status === 'open';
     }
 
     /**
