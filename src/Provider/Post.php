@@ -62,6 +62,11 @@ class Post extends FunctionMockerProvider
     private $posts = [];
 
     /**
+     * @var array<string|int,array<string,mixed>>
+     */
+    private $postMeta = [];
+
+    /**
      * @param \WP_Post $post
      * @return callable
      */
@@ -78,6 +83,7 @@ class Post extends FunctionMockerProvider
     public function reset(): void
     {
         $this->posts = [];
+        $this->postMeta = [];
         parent::reset();
     }
 
@@ -186,6 +192,7 @@ class Post extends FunctionMockerProvider
         $post->shouldReceive('to_array')->andReturn($toArray)->byDefault();
 
         $this->posts[$post->ID] = $toArray;
+        $this->postMeta[$post->ID] ??= [];
         $this->mockFunctions();
 
         return $post;
@@ -273,6 +280,67 @@ class Post extends FunctionMockerProvider
                     );
                     $post = $this->__invoke($postarr);
                     return (int)$post->ID;
+                }
+            );
+
+        $this->functionExpectations->mock('set_post_thumbnail')
+            ->andReturnUsing(
+                /**
+                 * Sets the post thumbnail (featured image) for the given post.
+                 *
+                 * @since 3.1.0
+                 *
+                 * @param int|WP_Post $post         Post ID or post object where thumbnail should be attached.
+                 * @param int         $thumbnail_id Thumbnail to attach.
+                 * @return int|bool True on success, false on failure.
+                 *
+                 * @see wordpress/wp-includes/post.php
+                 */
+                function (int|WP_Post $post, int $thumbnail_id ) {
+                    $postId = is_object($post) ? $post->ID : $post;
+                    if (!$postId) {
+                        return false;
+                    }
+
+                    $attachmentPostData = $this->posts[$thumbnail_id];
+                    // Thumbnail does not exist => remove featured image
+                    if (!$attachmentPostData) {
+                        unset($this->postMeta[$postId]['_thumbnail_id']);
+                        return true;
+                    }
+
+                    $this->postMeta[$postId]['_thumbnail_id'] = $thumbnail_id;
+                    return true;
+                }
+            );
+
+        $this->functionExpectations->mock('get_post_thumbnail_id')
+            ->andReturnUsing(
+                /**
+                 * Retrieves the post thumbnail ID.
+                 *
+                 * @since 2.9.0
+                 * @since 4.4.0 `$post` can be a post ID or WP_Post object.
+                 * @since 5.5.0 The return value for a non-existing post
+                 *              was changed to false instead of an empty string.
+                 *
+                 * @param int|WP_Post $post Optional. Post ID or WP_Post object. Default is global `$post`.
+                 * @return int|false Post thumbnail ID (which can be 0 if the thumbnail is not set),
+                 *                   or false if the post does not exist.
+                 *
+                 * @see wordpress/wp-includes/post-thumbnail-template.php
+                 */
+                function (int|WP_Post $post) {
+                    $postId = is_object($post) ? $post->ID : $post;
+                    if (!$postId) {
+                        return false;
+                    }
+
+                    if (!isset($this->postMeta[$postId]['_thumbnail_id'])) {
+                        return 0;
+                    }
+
+                    return (int) $this->postMeta[$postId]['_thumbnail_id'];
                 }
             );
 
