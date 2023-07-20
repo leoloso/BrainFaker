@@ -243,6 +243,11 @@ class Post extends FunctionMockerProvider
             ->with(\Mockery::any())
             ->andReturnUsing($this->getTheExcerpt(...));
 
+        $this->functionExpectations->mock('get_the_title')
+            ->zeroOrMoreTimes()
+            ->with(\Mockery::any())
+            ->andReturnUsing($this->getTheTitle(...));
+
         $this->functionExpectations->mock('get_post_status')
             ->zeroOrMoreTimes()
             ->with(\Mockery::any())
@@ -433,6 +438,12 @@ class Post extends FunctionMockerProvider
     {
         $post = is_object($post) ? $post : $this->getPost($post);
         return $post->post_excerpt;
+    }
+    
+    private function getTheTitle(int|\WP_Post $post): string
+    {
+        $post = is_object($post) ? $post : $this->getPost($post);
+        return $post->post_title;
     }
 
     private function getPost(int $postID): \WP_Post
