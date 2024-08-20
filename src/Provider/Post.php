@@ -288,6 +288,14 @@ class Post extends FunctionMockerProvider
                 }
             );
 
+        $this->functionExpectations->mock('wp_slash')
+            ->zeroOrMoreTimes()
+            ->andReturnUsing(
+                function ($postarr = array()) { // phpcs:ignore
+                    return $postarr;
+                }
+            );
+
         $this->functionExpectations->mock('set_post_thumbnail')
             ->andReturnUsing(
                 /**
