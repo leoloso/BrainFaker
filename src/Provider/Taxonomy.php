@@ -529,10 +529,7 @@ class Taxonomy extends FunctionMockerProvider
                 function ($postType) { // phpcs:ignore
                     $taxonomies = [];
                     foreach ($this->taxonomies as $taxonomyName => $taxonomyData) {
-                        $taxonomyPostTypes = $taxonomyData['post_type'] ?? [];
-                        if (is_string($taxonomyPostTypes)) {
-                            $taxonomyPostTypes = explode(',', $taxonomyPostTypes);
-                        }
+                        $taxonomyPostTypes = $taxonomyData['object_type'] ?? [];
                         if (!in_array($postType, $taxonomyPostTypes)) {
                             continue;
                         }
