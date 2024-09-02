@@ -517,10 +517,26 @@ class Taxonomy extends FunctionMockerProvider
 
         $this->functionExpectations->mock('taxonomy_exists')
             ->zeroOrMoreTimes()
-            ->zeroOrMoreTimes()
             ->andReturnUsing(
                 function ($name) { // phpcs:ignore
                     return is_scalar($name) && array_key_exists($name, $this->taxonomies);
+                }
+            );
+
+        $this->functionExpectations->mock('get_object_taxonomies')
+            ->zeroOrMoreTimes()
+            ->andReturnUsing(
+                function ($postType) { // phpcs:ignore
+                    $taxonomies = [];
+                    foreach ($this->taxonomies as $taxonomyName => $taxonomyData) {
+                        $taxonomyPostTypes = $taxonomyData['object_type'] ?? [];
+                        if (!in_array($postType, $taxonomyPostTypes)) {
+                            continue;
+                        }
+                        $taxonomies[] = $taxonomyName;
+                    }
+
+                    return $taxonomies;
                 }
             );
 
